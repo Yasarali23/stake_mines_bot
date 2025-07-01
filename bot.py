@@ -3,6 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from stake_predictor import generate_smart_tiles
 from config import BOT_TOKEN, ADMIN_ID
 import asyncio
+import datetime
 
 vip_users = set()
 
@@ -29,8 +30,16 @@ async def addsignal(update: Update, context: ContextTypes.DEFAULT_TYPE):
         vip_users.add(user_id)
         await update.message.reply_text(f"✅ User {user_id} added to VIP.")
     else:
+        
         await update.message.reply_text("❌ Admin only.")
-
+async def auto_signal(context: ContextTypes.DEFAULT_TYPE):
+    safe_tiles = generate_smart_tiles()
+    for user_id in vip_users:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"📡 Auto Stake Mines Signal\n✅ Safe Tiles: {safe_tiles}\n⏰ {datetime.datetime.now().strftime('%H:%M:%S')}"
+        )
+        
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("buyvip", buyvip))
